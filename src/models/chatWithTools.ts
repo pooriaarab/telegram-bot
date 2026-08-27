@@ -22,9 +22,11 @@ const params = {
 
 export class Model {
   public tools: Tool[];
-  public executor?: AgentExecutor;
   public openai: OpenAIApi;
   public model: ChatOpenAI;
+  // Cache the promise, not the resolved executor, so two concurrent call()s
+  // share one executor and therefore one conversation memory.
+  private executorPromise?: Promise<AgentExecutor>;
 
   constructor() {
     const configuration = new Configuration({
@@ -36,22 +38,24 @@ export class Model {
     this.model = new ChatOpenAI(params, configuration);
   }
 
+  private async initExecutor(): Promise<AgentExecutor> {
+    const executor = await initializeAgentExecutor(
+      this.tools,
+      this.model,
+      "chat-conversational-react-description",
+      true
+    );
+    executor.memory = new BufferMemory({
+      returnMessages: true,
+      memoryKey: "chat_history",
+      inputKey: "input",
+    });
+    return executor;
+  }
+
   public async call(input: string) {
-    let executor = this.executor;
-    if (!executor) {
-      executor = await initializeAgentExecutor(
-        this.tools,
-        this.model,
-        "chat-conversational-react-description",
-        true
-      );
-      executor.memory = new BufferMemory({
-        returnMessages: true,
-        memoryKey: "chat_history",
-        inputKey: "input",
-      });
-      this.executor = executor;
-    }
+    this.executorPromise ??= this.initExecutor();
+    const executor = await this.executorPromise;
 
     const response = await executor.call({ input });
 
