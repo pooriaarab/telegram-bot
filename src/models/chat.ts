@@ -11,7 +11,10 @@ import { ConversationChain } from "langchain/chains";
 import { Configuration } from "openai";
 import { OpenAIApi } from "openai";
 
-const openAIApiKey = process.env.OPENAI_API_KEY!;
+const openAIApiKey = process.env.OPENAI_API_KEY;
+if (!openAIApiKey) {
+  throw new Error("OPENAI_API_KEY is required");
+}
 
 const params = {
   verbose: true,

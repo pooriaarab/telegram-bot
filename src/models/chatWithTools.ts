@@ -5,7 +5,10 @@ import { Configuration } from "openai";
 import { OpenAIApi } from "openai";
 import { googleTool } from "./tools/google";
 
-const openAIApiKey = process.env.OPENAI_API_KEY!;
+const openAIApiKey = process.env.OPENAI_API_KEY;
+if (!openAIApiKey) {
+  throw new Error("OPENAI_API_KEY is required");
+}
 
 const params = {
   verbose: true,
@@ -34,21 +37,23 @@ export class Model {
   }
 
   public async call(input: string) {
-    if (!this.executor) {
-      this.executor = await initializeAgentExecutor(
+    let executor = this.executor;
+    if (!executor) {
+      executor = await initializeAgentExecutor(
         this.tools,
         this.model,
         "chat-conversational-react-description",
         true
       );
-      this.executor.memory = new BufferMemory({
+      executor.memory = new BufferMemory({
         returnMessages: true,
         memoryKey: "chat_history",
         inputKey: "input",
       });
+      this.executor = executor;
     }
 
-    const response = await this.executor!.call({ input });
+    const response = await executor.call({ input });
 
     console.log("Model response: " + response);
 

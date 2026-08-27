@@ -6,7 +6,7 @@ export async function setTemperatureCommand(
   setTemp: (temp: number) => void
 ) {
   bot.command("temperature", (ctx) => {
-    const text = (ctx.message as any).text;
+    const text = ctx.message.text;
     const temp = text.split(" ")[1];
     const temperature = parseFloat(temp);
 
