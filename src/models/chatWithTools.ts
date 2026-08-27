@@ -5,7 +5,10 @@ import { Configuration } from "openai";
 import { OpenAIApi } from "openai";
 import { googleTool } from "./tools/google";
 
-const openAIApiKey = process.env.OPENAI_API_KEY!;
+const openAIApiKey = process.env.OPENAI_API_KEY;
+if (!openAIApiKey) {
+  throw new Error("OPENAI_API_KEY is required");
+}
 
 const params = {
   verbose: true,
@@ -19,9 +22,11 @@ const params = {
 
 export class Model {
   public tools: Tool[];
-  public executor?: AgentExecutor;
   public openai: OpenAIApi;
   public model: ChatOpenAI;
+  // Cache the promise, not the resolved executor, so two concurrent call()s
+  // share one executor and therefore one conversation memory.
+  private executorPromise?: Promise<AgentExecutor>;
 
   constructor() {
     const configuration = new Configuration({
@@ -33,22 +38,26 @@ export class Model {
     this.model = new ChatOpenAI(params, configuration);
   }
 
-  public async call(input: string) {
-    if (!this.executor) {
-      this.executor = await initializeAgentExecutor(
-        this.tools,
-        this.model,
-        "chat-conversational-react-description",
-        true
-      );
-      this.executor.memory = new BufferMemory({
-        returnMessages: true,
-        memoryKey: "chat_history",
-        inputKey: "input",
-      });
-    }
+  private async initExecutor(): Promise<AgentExecutor> {
+    const executor = await initializeAgentExecutor(
+      this.tools,
+      this.model,
+      "chat-conversational-react-description",
+      true
+    );
+    executor.memory = new BufferMemory({
+      returnMessages: true,
+      memoryKey: "chat_history",
+      inputKey: "input",
+    });
+    return executor;
+  }
 
-    const response = await this.executor!.call({ input });
+  public async call(input: string) {
+    this.executorPromise ??= this.initExecutor();
+    const executor = await this.executorPromise;
+
+    const response = await executor.call({ input });
 
     console.log("Model response: " + response);
 

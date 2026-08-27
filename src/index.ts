@@ -10,10 +10,13 @@ import { Model as ChatModel } from "./models/chat";
 import { Model as ChatWithTools } from "./models/chatWithTools";
 
 const workDir = "./tmp";
-const telegramToken = process.env.TELEGRAM_TOKEN!;
+const telegramToken = process.env.TELEGRAM_TOKEN;
+if (!telegramToken) {
+  throw new Error("TELEGRAM_TOKEN is required");
+}
 
 const bot = new Telegraf(telegramToken);
-let model = new ChatWithTools();
+const model = new ChatWithTools();
 
 if (!existsSync(workDir)) {
   mkdirSync(workDir);
@@ -87,8 +90,16 @@ bot.on("voice", async (ctx) => {
   }
 });
 
+type OpenAIApiError = {
+  response?: {
+    data?: {
+      error?: unknown;
+    };
+  };
+};
+
 bot.on("message", async (ctx) => {
-  const text = (ctx.message as any).text;
+  const text = "text" in ctx.message ? ctx.message.text : undefined;
 
   if (!text) {
     ctx.reply("Please send a text message.");
@@ -106,7 +117,7 @@ bot.on("message", async (ctx) => {
     console.log(error);
 
     const message = JSON.stringify(
-      (error as any)?.response?.data?.error ?? "Unable to extract error"
+      (error as OpenAIApiError)?.response?.data?.error ?? "Unable to extract error"
     );
 
     console.log({ message });
