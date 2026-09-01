@@ -1,5 +1,11 @@
 # AGENTS.md
 
+## Brand and design context
+
+- Read `.agents/brand.md` before writing user-facing copy.
+- Read `.agents/design.md` before changing presentation or message structure.
+- Treat both files as the canonical brand and design context.
+
 <!-- pr-standards:start -->
 
 ## Pull requests
