@@ -1,10 +1,7 @@
 import { Telegraf } from "telegraf";
 import { Model } from "openai";
 
-export async function setTemperatureCommand(
-  bot: Telegraf,
-  setTemp: (temp: number) => void
-) {
+export async function setTemperatureCommand(bot: Telegraf, setTemp: (temp: number) => void) {
   bot.command("temperature", (ctx) => {
     const text = ctx.message.text;
     const temp = text.split(" ")[1];

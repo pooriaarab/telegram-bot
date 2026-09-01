@@ -3,11 +3,7 @@ import ffmpeg from "fluent-ffmpeg";
 import { Telegraf } from "telegraf";
 import axios from "axios";
 
-export async function downloadVoiceFile(
-  workDir: string,
-  fileId: string,
-  bot: Telegraf
-) {
+export async function downloadVoiceFile(workDir: string, fileId: string, bot: Telegraf) {
   const oggDestination = `${workDir}/${fileId}.ogg`;
   const wavDestination = `${workDir}/${fileId}.mp3`;
   const fileLink = await bot.telegram.getFileLink(fileId);
