@@ -31,12 +31,12 @@ bot.help((ctx) => {
 });
 
 bot.on("voice", async (ctx) => {
-
-  if(process.env.SERVE_THIS_USER_ONLY && parseInt(process.env.SERVE_THIS_USER_ONLY) !== ctx.message.chat.id){
+  if (
+    process.env.SERVE_THIS_USER_ONLY &&
+    parseInt(process.env.SERVE_THIS_USER_ONLY) !== ctx.message.chat.id
+  ) {
     console.log(`User ${ctx.message.chat.id.toString()} is not allowed to be served.`);
-    await ctx.reply(
-      "Sorry, you're not allowed to be served by me."
-    );
+    await ctx.reply("Sorry, you're not allowed to be served by me.");
     return;
   }
 
@@ -50,7 +50,7 @@ bot.on("voice", async (ctx) => {
   } catch (error) {
     console.log(error);
     await ctx.reply(
-      "Whoops! There was an error while downloading the voice file. Maybe ffmpeg is not installed?"
+      "Whoops! There was an error while downloading the voice file. Maybe ffmpeg is not installed?",
     );
     return;
   }
@@ -65,9 +65,7 @@ bot.on("voice", async (ctx) => {
     response = await model.call(transcription);
   } catch (error) {
     console.log(error);
-    await ctx.reply(
-      "Whoops! There was an error while talking to OpenAI. See logs for details."
-    );
+    await ctx.reply("Whoops! There was an error while talking to OpenAI. See logs for details.");
     return;
   }
 
@@ -85,7 +83,7 @@ bot.on("voice", async (ctx) => {
   } catch (error) {
     console.log(error);
     await ctx.reply(
-      "Whoops! There was an error while synthesizing the response via play.ht. See logs for details."
+      "Whoops! There was an error while synthesizing the response via play.ht. See logs for details.",
     );
   }
 });
@@ -117,14 +115,12 @@ bot.on("message", async (ctx) => {
     console.log(error);
 
     const message = JSON.stringify(
-      (error as OpenAIApiError)?.response?.data?.error ?? "Unable to extract error"
+      (error as OpenAIApiError)?.response?.data?.error ?? "Unable to extract error",
     );
 
     console.log({ message });
 
-    await ctx.reply(
-      "Whoops! There was an error while talking to OpenAI. Error: " + message
-    );
+    await ctx.reply("Whoops! There was an error while talking to OpenAI. Error: " + message);
   }
 });
 

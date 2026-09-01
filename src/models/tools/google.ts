@@ -3,8 +3,7 @@ import google from "googlethis";
 
 export const googleTool = new DynamicTool({
   name: "Google Search Tool",
-  description:
-    "This is Google. Use this tool to search the internet. Input should be a string",
+  description: "This is Google. Use this tool to search the internet. Input should be a string",
   func: async (searchPhrase: string) => {
     try {
       const response = await google.search(searchPhrase, {

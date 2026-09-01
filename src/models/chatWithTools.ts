@@ -43,7 +43,7 @@ export class Model {
       this.tools,
       this.model,
       "chat-conversational-react-description",
-      true
+      true,
     );
     executor.memory = new BufferMemory({
       returnMessages: true,
